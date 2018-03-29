@@ -1,0 +1,21 @@
+Vmid              Name                                           File                                     Guest OS          Version                        Annotation                      
+102    vTest-forward-2               [datastore1] vTest-forward-2/vTest-forward-2.vmx               centos64Guest           vmx-11                                                         
+106    vTest-forward-1               [datastore1] vTest-forward-1/vTest-forward-1.vmx               centos64Guest           vmx-11                                                         
+107    vTest-forward-0               [datastore1] vTest-forward-0/vTest-forward-0.vmx               centos64Guest           vmx-11                                                         
+108    vTest-mariadb-0               [datastore1] vTest-mariadb-0/vTest-mariadb-0.vmx               centos64Guest           vmx-11                                                         
+109    vTest-mariadb-1               [datastore1] vTest-mariadb-1/vTest-mariadb-1.vmx               centos64Guest           vmx-11                                                         
+110    vTest-mariadb-2               [datastore1] vTest-mariadb-2/vTest-mariadb-2.vmx               centos64Guest           vmx-11                                                         
+112    vTest-general-0               [datastore1] vTest-general-0/vTest-general-0.vmx               centos64Guest           vmx-11                                                         
+113    vTest-general-1               [datastore1] vTest-general-1/vTest-general-1.vmx               centos64Guest           vmx-11                                                         
+114    vDy-win2008-HuiYuan[2.78]     [iscsi_vm] vDy-win2008-HuiYuan/vDy-win2008-HuiYuan.vmx         windows7Server64Guest   vmx-11    慧源电子商务测试,对接胡锦超的项目用
+
+70     vDy-Samba[2.231]              [datastore1] vDy-Samba/vDy-Samba.vmx                           windows7Server64Guest   vmx-11                                                         
+71     vDev-igs-w3chk                [datastore1] vDev-igs-w3chk/vDev-igs-w3chk.vmx                 windows8Server64Guest   vmx-11    chk window 转码服务器                           
+73     vDy-Yum[2.254]                [datastore1] vDy-Yum/vDy-Yum.vmx                               centos64Guest           vmx-11                                                         
+75     vkzz-centos7                  [datastore1] vkzz-centos7/vkzz-centos7.vmx                     centos64Guest           vmx-11                                                         
+77     vDev-igs-w                    [datastore1] vDev-igs-w/vDev-igs-w.vmx                         windows8Server64Guest   vmx-11    构建window转码服务器机器的服务器        
+82     vDev-igs-w3Dev                [datastore1] vDev-igs-w3Dev/vDev-igs-w3Dev.vmx                 windows8Server64Guest   vmx-11    DEV 转码服务器                                  
+90     vDev-igs-w5                   [datastore1] vDev-igs-w5/vDev-igs-w5.vmx                       windows8Server64Guest   vmx-11                                                         
+95     vAndroid-a001                 [datastore1] vAndroid-a001/vAndroid-a001.vmx                   otherLinux64Guest       vmx-11                                                         
+96     vAndroid-a002                 [datastore1] vAndroid-a002/vAndroid-a002.vmx                   otherLinux64Guest       vmx-11                                                         
+97     vDy-win2012r2-jenkins[2.79]   [datastore1] vDy-win-jenkins[2.79]/vDy-win-jenkins[2.79].vmx   windows8Server64Guest   vmx-11    酷校客户端jenkins 构建服务器               
