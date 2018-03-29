@@ -19,7 +19,7 @@ if os.environ.has_key('PY_TEST') and os.environ['PY_TEST'] == "1":
     vmlist_cmd = ['cat', 'testdata/exsi.vmlist.txt']
     snapshot_cmd = ["echo"]
 if len(sys.argv) < 3:
-    print"Usage exsi.auto.snapshot.timer <node name> <task list configure uri> [workspace]"
+    print"Usage exsi.auto.snapshot.task <node name> <task list configure uri> [workspace]"
     sys.exit(1)
 
 name = sys.argv[1]
@@ -45,11 +45,20 @@ def getVmList():  # list vm by commond line
 # getVmList end
 
 
-def getConfig():
+def loadConfig():
     config = ConfigParser.ConfigParser()
     config.optionxform = str
-    contents = urllib2.urlopen(tslist_url)
-    config.readfp(contents)
+    logger = logging.getLogger(__name__)
+    for x in range(0, 3):
+        try:
+            contents = urllib2.urlopen(tslist_url)
+            config.readfp(contents)
+            logger.info("load config from %s success", tslist_url)
+            break
+        except Exception as e:
+            logger.warn("load config from %s fail with %s",
+                        tslist_url, e.message)
+            pass
     return config
 # getConfig end
 
@@ -111,29 +120,16 @@ def procSection(vmids, config, section, last):
         except:
             logger.exception("do snapshot on " + option + "/" +
                              vmid + " fail with\n")
-
-
-def procTask():
-    last = readLast()
-    config = getConfig()
-    vmids = getVmList()
-    if config.has_section(name):
-        procSection(vmids, config, name, last)
-    if config.has_section("all"):
-        procSection(vmids, config, "all", last)
-    storeLast(last)
-# procTask end
-
-
-# def sigterm_handler(_signo, _stack_frame):
-#     sys.exit(0)
-# signal.signal(signal.SIGTERM, sigterm_handler)
-# signal.signal(signal.SIGINT, sigterm_handler)
-
-# #
-# logger = logging.getLogger(__name__)
-# logger.info("start exsi.auto.snapshot.timer by delay(%ss),ws(%s)", delay, ws)
-# while True:
-#     procTask()
-#     time.sleep(delay)
-procTask()
+# procSection end
+logger = logging.getLogger(__name__)
+logger.info("start exsi.auto.snapshot.task by ws(%s)", ws)
+last = readLast()
+config = loadConfig()
+vmids = getVmList()
+if config.has_section(name):
+    procSection(vmids, config, name, last)
+if config.has_section("all"):
+    procSection(vmids, config, "all", last)
+storeLast(last)
+logger.info("exsi.auto.snapshot.task is done")
+# all done
