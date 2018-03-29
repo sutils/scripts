@@ -12,21 +12,20 @@ import signal
 #
 FORMAT = "%(asctime)s %(filename)s:%(lineno)s - %(funcName)s:%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
-# vmlist_cmd = ['cat', 'testdata/exsi.vmlist.txt']
-vmlist_cmd = ['vim-cmd', 'vmsvc/getallvms']
-# snapshot_cmd = ["echo"]
-snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.create']
 
+vmlist_cmd = ['vim-cmd', 'vmsvc/getallvms']
+snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.create']
+if os.environ.has_key('PY_TEST') and os.environ['PY_TEST'] == "1":
+    vmlist_cmd = ['cat', 'testdata/exsi.vmlist.txt']
+    snapshot_cmd = ["echo"]
 if len(sys.argv) < 3:
-    print"Usage exsi.auto.snapshot.timer <node name> <task list configure uri> [timer delay by second] [workspace]"
+    print"Usage exsi.auto.snapshot.timer <node name> <task list configure uri> [workspace]"
     sys.exit(1)
-section = sys.argv[1]
+
+name = sys.argv[1]
 tslist_url = sys.argv[2]
-delay = 10
-if len(sys.argv) > 3:
-    delay = int(sys.argv[3])
 ws = os.path.expanduser('~')
-if len(sys.argv) > 4:
+if len(sys.argv) > 3:
     ws = sys.argv[3]
 
 
@@ -76,15 +75,16 @@ def storeLast(config):
 # storeLast end
 
 
-def procTask():
-    last = readLast()
-    config = getConfig()
-    vmids = getVmList()
+def procSection(vmids, config, section, last):
     tslist = config.items(section)
     logger = logging.getLogger(__name__)
     for task in tslist:
         option = task[0]
         delay = config.getint(section, option)
+        if vmids.has_key(option) == False:
+            logger.info("do snapshot on " + option +
+                        " fail with vmid not found")
+            continue
         now = int(time.time())
         passed = now
         if last.has_option(section, option):
@@ -92,10 +92,6 @@ def procTask():
         if passed < delay:
             logger.info("do snapshot on " + option +
                         " is skipped by passed: %ss", passed)
-            continue
-        if vmids.has_key(option) == False:
-            logger.info("do snapshot on " + option +
-                        " fail with vmid not found")
             continue
         try:
             vmid = vmids[option]
@@ -112,21 +108,32 @@ def procTask():
             if last.has_section(section) == False:
                 last.add_section(section)
             last.set(section, option, now)
-        except Exception as e:
+        except:
             logger.exception("do snapshot on " + option + "/" +
                              vmid + " fail with\n")
+
+
+def procTask():
+    last = readLast()
+    config = getConfig()
+    vmids = getVmList()
+    if config.has_section(name):
+        procSection(vmids, config, name, last)
+    if config.has_section("all"):
+        procSection(vmids, config, "all", last)
     storeLast(last)
 # procTask end
 
 
-def sigterm_handler(_signo, _stack_frame):
-    sys.exit(0)
-signal.signal(signal.SIGTERM, sigterm_handler)
-signal.signal(signal.SIGINT, sigterm_handler)
+# def sigterm_handler(_signo, _stack_frame):
+#     sys.exit(0)
+# signal.signal(signal.SIGTERM, sigterm_handler)
+# signal.signal(signal.SIGINT, sigterm_handler)
 
-#
-logger = logging.getLogger(__name__)
-logger.info("start exsi.auto.snapshot.timer by delay(%ss),ws(%s)", delay, ws)
-while True:
-    procTask()
-    time.sleep(delay)
+# #
+# logger = logging.getLogger(__name__)
+# logger.info("start exsi.auto.snapshot.timer by delay(%ss),ws(%s)", delay, ws)
+# while True:
+#     procTask()
+#     time.sleep(delay)
+procTask()
