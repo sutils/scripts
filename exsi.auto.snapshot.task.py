@@ -8,9 +8,14 @@ import time
 import datetime
 import logging
 import signal
+import ssl
+
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 #
-FORMAT = "%(asctime)s %(filename)s:%(lineno)s - %(funcName)s:%(message)s"
+FORMAT = "%(asctime)s %(filename)s:%(lineno)s %(levelname)s- %(funcName)s:%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 vmlist_cmd = ['vim-cmd', 'vmsvc/getallvms']
@@ -51,13 +56,13 @@ def loadConfig():
     logger = logging.getLogger(__name__)
     for x in range(0, 3):
         try:
-            contents = urllib2.urlopen(tslist_url)
+            contents = urllib2.urlopen(tslist_url, context=ctx)
             config.readfp(contents)
             logger.info("load config from %s success", tslist_url)
             break
         except Exception as e:
-            logger.warn("load config from %s fail with %s",
-                        tslist_url, e.message)
+            logger.exception("load config from %s fail with %s",
+                             tslist_url, e.message)
             pass
     return config
 # getConfig end
