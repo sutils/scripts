@@ -1,0 +1,13 @@
+Get Snapshot:
+|-ROOT
+--Snapshot Name        : test-20180402-1
+--Snapshot Id        : 30
+--Snapshot Desciption  : 
+--Snapshot Created On  : 4/2/2018 2:52:19
+--Snapshot State       : powered off
+--|-CHILD
+----Snapshot Name        : test-20180402-3
+----Snapshot Id        : 32
+----Snapshot Desciption  : 
+----Snapshot Created On  : 4/2/2018 2:52:23
+----Snapshot State       : powered off

@@ -19,19 +19,26 @@ FORMAT = "%(asctime)s %(filename)s:%(lineno)s %(levelname)s- %(funcName)s:%(mess
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 vmlist_cmd = ['vim-cmd', 'vmsvc/getallvms']
-snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.create']
+create_snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.create']
+list_snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.get']
+remove_snapshot_cmd = ['vim-cmd', 'vmsvc/snapshot.remove']
 if os.environ.has_key('PY_TEST') and os.environ['PY_TEST'] == "1":
     vmlist_cmd = ['cat', 'testdata/exsi.vmlist.txt']
-    snapshot_cmd = ["echo"]
+    create_snapshot_cmd = ["echo"]
+    list_snapshot_cmd = ['cat', 'testdata/exsi.sslist.txt']
+    remove_snapshot_cmd = ['echo']
 if len(sys.argv) < 3:
-    print"Usage exsi.auto.snapshot.task <node name> <task list configure uri> [workspace]"
+    print"Usage exsi.auto.snapshot.task <node name> <task list configure uri> [snapshot max] [workspace]"
     sys.exit(1)
 
 name = sys.argv[1]
 tslist_url = sys.argv[2]
+ss_max = 30
 ws = os.path.expanduser('~')
 if len(sys.argv) > 3:
-    ws = sys.argv[3]
+    ss_max = int(sys.argv[3])
+if len(sys.argv) > 4:
+    ws = sys.argv[4]
 
 
 def getVmList():  # list vm by commond line
@@ -48,6 +55,29 @@ def getVmList():  # list vm by commond line
         vmids[vminfo[1]] = vminfo[0]
     return vmids
 # getVmList end
+
+
+def getVmSnapshot(vmid):  # list vm snapshot
+    cmds = list_snapshot_cmd[:]
+    cmds.extend([vmid])
+    allss = check_output(cmds).split("\n")[1:]
+    sslist = []
+    for ss in allss:
+        ss = ss.strip()
+        if len(ss) < 1:
+            continue
+        ssinfo = ss.split("-")
+        if len(ssinfo) < 2:
+            continue
+        ss = ssinfo[len(ssinfo) - 1]
+        if not ss.startswith("Snapshot Id"):
+            continue
+        ssinfo = ss.split(":")
+        if len(ssinfo) < 2:
+            continue
+        sslist.extend([ssinfo[1].strip()])
+    return sslist
+# getVmSnapshot end
 
 
 def loadConfig():
@@ -109,15 +139,24 @@ def procSection(vmids, config, section, last):
             continue
         try:
             vmid = vmids[option]
-            logger.info("start do snapshot on " + option + "/" + vmid)
-            snapshot_name = datetime.datetime.fromtimestamp(
+            logger.info("start create snapshot on " + option + "/" + vmid)
+            snapshot_name = "auto-" + datetime.datetime.fromtimestamp(
                 time.time()).strftime('%Y%m%d-%H:%M:%S')
             # do create snapshot
-            cmds = snapshot_cmd[:]
+            cmds = create_snapshot_cmd[:]
             cmds.extend([vmid, snapshot_name, "auto"])
             output = check_output(cmds)
-            logger.info("do snapshot on " + option + "/" +
+            logger.info("create snapshot on " + option + "/" +
                         vmid + " success by\n" + output)
+            # do remove old snapshot
+            if ss_max > 0:
+                sslist = getVmSnapshot(vmid)
+                if len(sslist) > ss_max:
+                    cmds = remove_snapshot_cmd[:]
+                    cmds.extend([vmid, sslist[0]])
+                    output = check_output(cmds)
+                    logger.info("remove snapshot on " + option + "/" +
+                                vmid + "/" + sslist[0] + " success by\n" + output)
             # update last
             if last.has_section(section) == False:
                 last.add_section(section)
