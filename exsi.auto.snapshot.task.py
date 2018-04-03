@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from subprocess import check_output
+import urllib
 import urllib2
 import ConfigParser
 import os
@@ -86,8 +87,18 @@ def loadConfig():
     logger = logging.getLogger(__name__)
     for x in range(0, 3):
         try:
-            contents = urllib2.urlopen(tslist_url, context=ctx)
-            config.readfp(contents)
+            if tslist_url.find("@") > -1:
+                parts = tslist_url.split("@")
+                auth_parts = parts[0].split("//")
+                user_pass = auth_parts[1].split(":")
+                data = urllib.urlencode(
+                    {'username': user_pass[0], 'password': user_pass[1]})
+                req = urllib2.Request(auth_parts[0] + "//" + parts[1], data)
+                response = urllib2.urlopen(req)
+                config.readfp(response)
+            else:
+                response = urllib2.urlopen(tslist_url, context=ctx)
+                config.readfp(response)
             logger.info("load config from %s success", tslist_url)
             break
         except Exception as e:
