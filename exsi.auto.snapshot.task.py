@@ -10,6 +10,7 @@ import datetime
 import logging
 import signal
 import ssl
+import base64
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -91,9 +92,10 @@ def loadConfig():
                 parts = tslist_url.split("@")
                 auth_parts = parts[0].split("//")
                 user_pass = auth_parts[1].split(":")
-                data = urllib.urlencode(
-                    {'username': user_pass[0], 'password': user_pass[1]})
-                req = urllib2.Request(auth_parts[0] + "//" + parts[1], data)
+                auth_str = base64.b64encode(
+                    '%s:%s' % (user_pass[0], user_pass[1]))
+                req = urllib2.Request(auth_parts[0] + "//" + parts[1])
+                req.add_header("Authorization", "Basic %s" % auth_str)
                 response = urllib2.urlopen(req)
                 config.readfp(response)
             else:
