@@ -183,6 +183,8 @@ logger.info("start exsi.auto.snapshot.task by ws(%s)", ws)
 last = readLast()
 config = loadConfig()
 vmids = getVmList()
+if config.has_option("conf", "ss_max"):
+    ss_max = config.getint("conf", "ss_max")
 if config.has_section(name):
     procSection(vmids, config, name, last)
 if config.has_section("all"):
