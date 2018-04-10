@@ -110,7 +110,7 @@ def loadConfig():
         except Exception as e:
             logger.exception("load config from %s fail with %s",
                              tslist_url, e.message)
-            error = e.message
+            error = str(e)
             pass
     if len(error) > 0:
         raise error
