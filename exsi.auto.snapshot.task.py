@@ -98,9 +98,11 @@ def loadConfig():
                 req.add_header("Authorization", "Basic %s" % auth_str)
                 response = urllib2.urlopen(req)
                 config.readfp(response)
+                response.close()
             else:
                 response = urllib2.urlopen(tslist_url, context=ctx)
                 config.readfp(response)
+                response.close()
             logger.info("load config from %s success", tslist_url)
             break
         except Exception as e:
