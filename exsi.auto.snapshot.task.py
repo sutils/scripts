@@ -86,6 +86,7 @@ def loadConfig():
     config = ConfigParser.ConfigParser()
     config.optionxform = str
     logger = logging.getLogger(__name__)
+    error = ""
     for x in range(0, 3):
         try:
             if tslist_url.find("@") > -1:
@@ -104,11 +105,15 @@ def loadConfig():
                 config.readfp(response)
                 response.close()
             logger.info("load config from %s success", tslist_url)
+            error = ""
             break
         except Exception as e:
             logger.exception("load config from %s fail with %s",
                              tslist_url, e.message)
+            error = e.message
             pass
+    if len(error) > 0:
+        raise error
     return config
 # getConfig end
 
